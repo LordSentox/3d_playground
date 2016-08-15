@@ -11,6 +11,8 @@ use std::ptr;
 use std::str;
 use std::ffi::CString;
 
+pub mod graphics;
+
 // Vertex data
 static VERTEX_DATA: [GLfloat; 6] = [
      0.0,  0.5,
@@ -24,7 +26,7 @@ fn main() {
 
     video.gl_attr().set_context_profile(GLProfile::Core);
     video.gl_attr().set_context_flags().debug().set();
-    video.gl_attr().set_context_version(4, 1);
+    video.gl_attr().set_context_version(3, 3);
 
     video.gl_attr().set_accelerated_visual(true);
     video.gl_attr().set_double_buffer(true);
@@ -35,7 +37,7 @@ fn main() {
 
     let window = match video.window("Hello, 3d", 800, 600)
         .opengl()
-        .resizable()
+        .fullscreen_desktop()
         .build() {
             Ok(window) => window,
             Err(err) => panic!("failed to create window: {}", err),
