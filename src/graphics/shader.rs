@@ -3,9 +3,12 @@ use gl::types::*;
 use super::error::ShaderError as Error;
 use std::ptr;
 use std::ffi::CString;
+use std::fs::File;
+use std::io::Read;
 
 pub struct Shader {
 	id: GLuint,
+	ty: GLenum
 }
 
 impl Shader {
@@ -33,7 +36,8 @@ impl Shader {
 			}
 			else {
 				Ok(Shader {
-					id: shader_id
+					id: shader_id,
+					ty: ty
 				})
 			}
 		}
@@ -47,6 +51,42 @@ impl Shader {
 	/// .geom for Geometry-Shaders
 	pub fn from_file(name: &str) -> Result<Shader, Error> {
 		// Determine the type of shader we're dealing with.
+		let ty: GLenum = if name.ends_with(".vert") {
+			gl::VERTEX_SHADER
+		}
+		else if name.ends_with(".frag") {
+			gl::FRAGMENT_SHADER
+		}
+		else if name.ends_with(".geom") {
+			gl::GEOMETRY_SHADER
+		}
+		else {
+			return Err(Error::FileNameError);
+		};
 
+		// Read the complete file into memory and compile the string afterwards.
+		let mut file = match File::open(name) {
+			Ok(file) => file,
+			Err(err) => return Err(Error::FileError(err))
+		};
+
+		let mut code = String::new();
+		match file.read_to_string(&mut code) {
+			Ok(length) => println!("Read {}Bytes from shader file {}", length, &name),
+			Err(err) => return Err(Error::FileError(err))
+		}
+
+		// Try compiling the code.
+		Shader::from_str(&code, ty)
+	}
+
+	/// Returns the internal shader id used by OpenGL to identify this shader.
+	pub fn internal_id(&self) -> GLuint {
+		self.id
+	}
+
+	/// Get the shader type, i.e. wether this is a vertex, fragment or geometry shader.
+	pub fn shader_type(&self) -> GLenum {
+		self.ty
 	}
 }
