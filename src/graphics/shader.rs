@@ -90,3 +90,9 @@ impl Shader {
 		self.ty
 	}
 }
+
+impl Drop for Shader {
+	fn drop(&mut self) {
+		unsafe { gl::DeleteShader(self.id); }
+	}
+}

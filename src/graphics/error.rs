@@ -22,3 +22,26 @@ impl fmt::Display for ShaderError {
 impl Error for ShaderError {
 	fn description(&self) -> &str { "Could not load shader." }
 }
+
+#[derive(Debug)]
+pub struct LinkerError {
+	error_msg: String
+}
+
+impl LinkerError {
+	pub fn new(msg: &str) -> LinkerError {
+		LinkerError {
+			error_msg: msg.to_string()
+		}
+	}
+}
+
+impl fmt::Display for LinkerError {
+	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+		write!(f, "{}", self.error_msg)
+	}
+}
+
+impl Error for LinkerError {
+	fn description(&self) -> &str { "Could not link program." }
+}
