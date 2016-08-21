@@ -2,7 +2,7 @@ use gl;
 use gl::types::*;
 use std::ptr;
 use std::ffi::CStr;
-use super::Shader;
+use super::{GLId, Shader};
 use super::error::LinkerError as Error;
 
 pub struct Program {
@@ -23,7 +23,7 @@ impl Program {
 	/// If you want to use the shame shader for multiple programs, use the lend_shader function.
 	pub fn attach_shader(&mut self, shader: Shader) {
 		unsafe {
-			gl::AttachShader(self.id, shader.internal_id());
+			gl::AttachShader(self.id, shader.gl_id());
 			self.owned_shaders.push(shader);
 		}
 	}
@@ -48,15 +48,17 @@ impl Program {
 			else {
 				// Deattach all owned shaders, since the program is now linked and does not require them any more.
 				for shader in self.owned_shaders.drain(..) {
-					gl::DetachShader(self.id, shader.internal_id());
+					gl::DetachShader(self.id, shader.gl_id());
 				}
 
 				Ok(())
 			}
 		}
 	}
+}
 
-	pub fn internal_id(&self) -> GLuint {
+impl GLId for Program {
+	fn gl_id(&self) -> GLuint {
 		self.id
 	}
 }

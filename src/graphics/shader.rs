@@ -1,5 +1,6 @@
 use gl;
 use gl::types::*;
+use super::GLId;
 use super::error::ShaderError as Error;
 use std::ptr;
 use std::ffi::CString;
@@ -80,14 +81,15 @@ impl Shader {
 		Shader::from_str(&code, ty)
 	}
 
-	/// Returns the internal shader id used by OpenGL to identify this shader.
-	pub fn internal_id(&self) -> GLuint {
-		self.id
-	}
-
 	/// Get the shader type, i.e. wether this is a vertex, fragment or geometry shader.
 	pub fn shader_type(&self) -> GLenum {
 		self.ty
+	}
+}
+
+impl GLId for Shader {
+	fn gl_id(&self) -> GLuint {
+		self.id
 	}
 }
 

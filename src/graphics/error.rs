@@ -45,3 +45,26 @@ impl fmt::Display for LinkerError {
 impl Error for LinkerError {
 	fn description(&self) -> &str { "Could not link program." }
 }
+
+#[derive(Debug)]
+pub struct WindowError {
+	error_msg: String
+}
+
+impl WindowError {
+	pub fn new(msg: &str) -> WindowError {
+		WindowError {
+			error_msg: msg.to_string()
+		}
+	}
+}
+
+impl fmt::Display for WindowError {
+	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+		write!(f, "{}", self.error_msg)
+	}
+}
+
+impl Error for WindowError {
+	fn description(&self) -> &str { "Could not open window." }
+}
