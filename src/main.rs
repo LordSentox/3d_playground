@@ -12,69 +12,37 @@ use std::str;
 use std::ffi::CString;
 
 pub mod graphics;
+use graphics::*;
 
 // Vertex data
-static VERTEX_DATA: [GLfloat; 6] = [
-     0.0,  0.5,
-     0.5, -0.5,
-    -0.5, -0.5
+static VERTEX_DATA: [GLfloat; 9] = [
+	-1.0, -1.0, 0.0,
+	 1.0, -1.0, 0.0,
+	 0.0,  1.0, 0.0
 ];
 
 fn main() {
-    let sdl = sdl2::init().unwrap();
-    let video = sdl.video().unwrap();
-
-    video.gl_attr().set_context_profile(GLProfile::Core);
-    video.gl_attr().set_context_flags().debug().set();
-    video.gl_attr().set_context_version(3, 3);
-
-    video.gl_attr().set_accelerated_visual(true);
-    video.gl_attr().set_double_buffer(true);
-
-    // Enable anti-aliasing
-    video.gl_attr().set_multisample_buffers(1);
-    video.gl_attr().set_multisample_samples(4);
-
-    let window = match video.window("Hello, 3d", 800, 600)
-        .opengl()
-        .fullscreen_desktop()
-        .build() {
-            Ok(window) => window,
-            Err(err) => panic!("failed to create window: {}", err),
-    };
-
-    let gl_context = match window.gl_create_context() {
-        Err(err) => panic!("failed to create GL context: {}", err),
-        Ok(gl_context) => {
-            gl::load_with(|s| unsafe {
-                mem::transmute(video.gl_get_proc_address(s))
-            });
-
-            gl_context
-        },
-    };
+	let window = Window::new("McSwag Swag", false, None).unwrap();
 
 	let mut vao = 0;
 	let mut vbo = 0;
 
 	unsafe {
-	    // Create Vertex Array Object
-	    gl::GenVertexArrays(1, &mut vao);
-	    gl::BindVertexArray(vao);
+	// Create Vertex Array Object
+	gl::GenVertexArrays(1, &mut vao);
+	gl::BindVertexArray(vao);
 
-	    // Create a Vertex Buffer Object and copy the vertex data to it
-	    gl::GenBuffers(1, &mut vbo);
-	    gl::BindBuffer(gl::ARRAY_BUFFER, vbo);
-	    gl::BufferData(gl::ARRAY_BUFFER,
-	                   (VERTEX_DATA.len() * mem::size_of::<GLfloat>()) as GLsizeiptr,
-	                   mem::transmute(&VERTEX_DATA[0]),
-	                   gl::STATIC_DRAW);
+	// Create a Vertex Buffer Object and copy the vertex data to it
+	gl::GenBuffers(1, &mut vbo);
+	gl::BindBuffer(gl::ARRAY_BUFFER, vbo);
+	gl::BufferData(gl::ARRAY_BUFFER,
+				(VERTEX_DATA.len() * mem::size_of::<GLfloat>()) as GLsizeiptr,
+				mem::transmute(&VERTEX_DATA[0]),
+				gl::STATIC_DRAW);
 	}
 
-	let mut event_pump = sdl.event_pump().unwrap();
-
 	'running: loop {
-		for event in event_pump.poll_iter() {
+		while let Some(event) = window.poll_event() {
 			match event {
 				Event::Quit {..} | Event::KeyDown {keycode: Some(Keycode::Escape), ..} => {
 					break 'running
@@ -83,14 +51,11 @@ fn main() {
 			}
 		}
 
-		unsafe {
-            gl::ClearColor(0.1, 0.1, 0.4, 1.0);
-            gl::Clear(gl::COLOR_BUFFER_BIT);
+		window.clear();
 
-			gl::DrawArrays(gl::TRIANGLES, 0, 3);
-		}
+		unsafe { gl::DrawArrays(gl::TRIANGLES, 0, 3); }
 
-        window.gl_swap_window();
+		window.display();
 	}
 }
 
