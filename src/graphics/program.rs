@@ -19,6 +19,18 @@ impl Program {
 		}
 	}
 
+	// Create a new program with shaders directly provided and link them directly.
+	// However, this function might fail due to a linker error.
+	//
+	// pub fn create_and_link(shaders: Vec<Shader>) -> Result<Program, Error> {
+	// 	let program = Program::new();
+	//
+	// 	for shader in shaders {
+	// 		self.attach_shader(shader);
+	// 	}
+	// }
+	// TODO
+
 	/// Attach the Shader to the program. The shader is consumed and can only be used in this program.
 	/// If you want to use the shame shader for multiple programs, use the lend_shader function.
 	pub fn attach_shader(&mut self, shader: Shader) {

@@ -1,8 +1,10 @@
 use gl;
 use sdl2;
 // use super::error::WindowError as Error;
-use sdl2::video::WindowBuildError as BuildError;
+use sdl2::video::{GLProfile, WindowBuildError as BuildError};
 use sdl2::event::Event;
+
+use std::mem;
 
 pub struct Window {
 	sdl_context: sdl2::Sdl,
@@ -24,6 +26,10 @@ impl Window {
 			Err(err) => return Err(BuildError::SdlError(err))
 		};
 
+		// This library uses OpenGL version 330 core by default.
+		video.gl_attr().set_context_profile(GLProfile::Core);
+		video.gl_attr().set_context_version(3, 3);
+
 		// TODO: This is not a very nice way of doing it. However I couldn't find any corresponding
 		// sdl2-crate functions that would allow me to do this in a straightforward manner.
 		let window = match (size, fullscreen) {
@@ -40,9 +46,19 @@ impl Window {
 		};
 
 		let gl_context = match window.gl_create_context() {
-			Ok(context) => context,
+			Ok(context) => {
+				// Load gl functions and return the resulting context.
+				gl::load_with(|s| unsafe {
+                    mem::transmute(video.gl_get_proc_address(s))
+                });
+
+				context
+			}
 			Err(err) => return Err(BuildError::SdlError(err))
 		};
+
+		// Make the window current, to register as the correct GL-context.
+		window.gl_make_current(&gl_context);
 
 		let event_pump = match sdl.event_pump() {
 			Ok(pump) => pump,
