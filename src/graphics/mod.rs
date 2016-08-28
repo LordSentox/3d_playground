@@ -1,3 +1,6 @@
+pub mod camera;
+pub use self::camera::*;
+
 pub mod error;
 pub use self::error::*;
 

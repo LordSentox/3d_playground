@@ -57,8 +57,9 @@ impl Window {
 			Err(err) => return Err(BuildError::SdlError(err))
 		};
 
+		gl::Enable(gl::DEPTH_TEST);
 		// Make the window current, to register as the correct GL-context.
-		window.gl_make_current(&gl_context);
+		let _ = window.gl_make_current(&gl_context);
 
 		let event_pump = match sdl.event_pump() {
 			Ok(pump) => pump,
