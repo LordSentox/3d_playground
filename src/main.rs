@@ -11,7 +11,7 @@ use std::ptr;
 use std::str;
 use std::ffi::CString;
 
-use cgmath::prelude::*;
+use cgmath::*;
 
 pub mod graphics;
 use graphics::*;
@@ -20,12 +20,13 @@ use graphics::*;
 static VERTEX_DATA: [GLfloat; 18] = [
 	// Positions         // Colors
 	 0.5, -0.5, -1.0,  1.0, 0.0, 0.0,   // Bottom Right
-	-0.5, -0.5, -2.5,  0.0, 1.0, 0.0,   // Bottom Left
-	 0.0,  0.5, -0.2,  0.0, 0.0, 1.0    // Top
+	-0.5, -0.5, 0.5,  0.0, 1.0, 0.0,   // Bottom Left
+	 0.0,  0.5, 2.0,  0.0, 0.0, 1.0    // Top
 ];
 
 fn main() {
-	let mut window = Window::new("McSwag Swag", false, None).unwrap();
+	let camera = FPSCamera::new(Some(Point3::new(0.0, 0.0, -3.0)));
+	let mut window = Window::new("McSwag Swag", true, None, Box::new(camera)).unwrap();
 
 	// Load test shaders to draw the triangle.
 	let vert = Shader::from_file("data/shaders/test.vert").unwrap();
@@ -37,27 +38,6 @@ fn main() {
 
 	let mut vao = 0;
 	let mut vbo = 0;
-
-	// GLuint VBO, VAO;
-    // glGenVertexArrays(1, &VAO);
-    // glGenBuffers(1, &VBO);
-    // // Bind the Vertex Array Object first, then bind and set vertex buffer(s) and attribute pointer(s).
-    // glBindVertexArray(VAO);
-	//
-    // glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    // glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-	//
-    // glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
-    // glEnableVertexAttribArray(0);
-	//
-    // glBindBuffer(GL_ARRAY_BUFFER, 0); // Note that this is allowed, the call to glVertexAttribPointer registered VBO as the currently bound vertex buffer object so afterwards we can safely unbind
-	//
-    // glBindVertexArray(0); // Unbind VAO (it's always a good thing to unbind any buffer/array to prevent strange bugs)
-
-	// Projection matrix
-	let proj = cgmath::perspective(cgmath::Deg(90.0 as f32), 8.0/6.0, 0.1, 100.0);
-	let mut proj_loc = -1;
-	unsafe { proj_loc = gl::GetUniformLocation(program.gl_id(), CString::new("matrix").unwrap().as_ptr()); }
 
 	unsafe {
 	// Create Vertex Array Object
@@ -82,24 +62,27 @@ fn main() {
 	gl::EnableVertexAttribArray(1);
 	}
 
+	let mut event_pump = window.event_pump();
+
 	'running: loop {
-		while let Some(event) = window.poll_event() {
+		for event in event_pump.poll_iter() {
 			match event {
 				Event::Quit {..} | Event::KeyDown {keycode: Some(Keycode::Escape), ..} => {
 					break 'running
 				},
+				Event::MouseMotion {xrel: xrel, yrel: yrel, ..} => {
+					// Let the camera handle the event.
+					window.camera_mut().handle_mouse_motion(xrel, yrel);
+				}
 				_ => {}
 			}
 		}
 
 		window.clear();
 
-		program.use_program();
+		window.use_program(&program);
 
 		unsafe {
-			// Set the projection matrix in the shader program.
-			gl::UniformMatrix4fv(proj_loc, 1, gl::FALSE, proj.as_ptr());
-
 			gl::BindVertexArray(vao);
 			gl::DrawArrays(gl::TRIANGLES, 0, 3);
 	 	}

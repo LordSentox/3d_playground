@@ -67,10 +67,6 @@ impl Program {
 			}
 		}
 	}
-
-	pub fn use_program(&self) {
-		unsafe { gl::UseProgram(self.id); }
-	}
 }
 
 impl GLId for Program {
