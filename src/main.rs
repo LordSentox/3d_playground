@@ -8,8 +8,6 @@ use sdl2::keyboard::Keycode;
 use gl::types::*;
 use std::mem;
 use std::ptr;
-use std::str;
-use std::ffi::CString;
 
 use cgmath::*;
 
@@ -70,12 +68,36 @@ fn main() {
 				Event::Quit {..} | Event::KeyDown {keycode: Some(Keycode::Escape), ..} => {
 					break 'running
 				},
-				Event::MouseMotion {xrel: xrel, yrel: yrel, ..} => {
+				Event::MouseMotion {xrel, yrel, ..} => {
 					// Let the camera handle the event.
 					window.camera_mut().handle_mouse_motion(xrel, yrel);
 				}
 				_ => {}
 			}
+		}
+
+		// Character camera helper vectors.
+		let front = window.camera().front();
+		let right = front.cross(vec3(0.0, 1.0, 0.0));
+
+		// Ignore y values.
+		let front = vec2(front.x, front.z).normalize();
+		let right = vec2(right.x, right.z).normalize();
+
+		// Handle character movement.
+		let key_state = event_pump.keyboard_state();
+		let mut dir: Vector2<f32> = vec2(0.0, 0.0);
+		if (key_state.is_scancode_pressed(Scancode::Comma)) {
+			dir += front;
+		}
+		if (key_state.is_scancode_pressed(Scancode::O)) {
+			dir -= front;
+		}
+		if (key_state.is_scancode_pressed(Scancode::E)) {
+			dir += right;
+		}
+		if (key_state.is_scancode_pressed(Scancode::A)) {
+			dir -= right;
 		}
 
 		window.clear();

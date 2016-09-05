@@ -76,11 +76,6 @@ impl Window {
 		// Make the window current, to register as the correct GL-context.
 		let _ = window.gl_make_current(&gl_context);
 
-		let event_pump = match sdl.event_pump() {
-			Ok(pump) => pump,
-			Err(err) => return Err(BuildError::SdlError(err))
-		};
-
 		let mut this = Window {
 			sdl_context: sdl,
 			sdl_window: window,
@@ -138,17 +133,15 @@ impl Window {
 			gl::UseProgram(program.gl_id());
 
 			// Provide the projection and view matrix to the program.
-			unsafe {
-				// TODO: Since the positions don't change for the program, these
-				// should be set when creating the program, and not every frame
-				// or maybe every other frame.
-				let mut proj_loc = gl::GetUniformLocation(program.gl_id(), CString::new("proj_mat").unwrap().as_ptr());
-				let mut view_loc = gl::GetUniformLocation(program.gl_id(), CString::new("view_mat").unwrap().as_ptr());
+			// TODO: Since the positions don't change for the program, these
+			// should be set when creating the program, and not every frame
+			// or maybe every other frame.
+			let proj_loc = gl::GetUniformLocation(program.gl_id(), CString::new("proj_mat").unwrap().as_ptr());
+			let view_loc = gl::GetUniformLocation(program.gl_id(), CString::new("view_mat").unwrap().as_ptr());
 
-				// Set view and projection matrix.
-				gl::UniformMatrix4fv(proj_loc, 1, gl::FALSE, self.proj_mat.as_ptr());
-				gl::UniformMatrix4fv(view_loc, 1, gl::FALSE, self.camera.view_matrix().as_ptr());
-			}
+			// Set view and projection matrix.
+			gl::UniformMatrix4fv(proj_loc, 1, gl::FALSE, self.proj_mat.as_ptr());
+			gl::UniformMatrix4fv(view_loc, 1, gl::FALSE, self.camera.view_matrix().as_ptr());
 		}
 	}
 }
