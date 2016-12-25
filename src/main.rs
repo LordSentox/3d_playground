@@ -3,7 +3,7 @@ extern crate gl;
 extern crate sdl2;
 
 use sdl2::event::Event;
-use sdl2::keyboard::Keycode;
+use sdl2::keyboard::{Keycode, Scancode};
 
 use gl::types::*;
 use std::mem;
@@ -87,16 +87,16 @@ fn main() {
 		// Handle character movement.
 		let key_state = event_pump.keyboard_state();
 		let mut dir: Vector2<f32> = vec2(0.0, 0.0);
-		if (key_state.is_scancode_pressed(Scancode::Comma)) {
+		if key_state.is_scancode_pressed(Scancode::Comma) {
 			dir += front;
 		}
-		if (key_state.is_scancode_pressed(Scancode::O)) {
+		if key_state.is_scancode_pressed(Scancode::O) {
 			dir -= front;
 		}
-		if (key_state.is_scancode_pressed(Scancode::E)) {
+		if key_state.is_scancode_pressed(Scancode::E) {
 			dir += right;
 		}
-		if (key_state.is_scancode_pressed(Scancode::A)) {
+		if key_state.is_scancode_pressed(Scancode::A) {
 			dir -= right;
 		}
 

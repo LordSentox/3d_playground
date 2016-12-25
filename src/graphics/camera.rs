@@ -1,15 +1,15 @@
 use cgmath::prelude::*;
 use cgmath::{Deg, Rad, vec3, Vector3, Point3, Matrix4};
+use std::sync::{Arc, Mutex};
 
 pub trait Camera {
 	fn pos(&self) -> Point3<f32>;
 	fn set_pos(&mut self, pos: Point3<f32>);
-	fn move(&mut self, vec: Vector3<f32>);
+
+	fn front(&self) -> Vector3<f32>;
 
 	fn center(&self) -> Point3<f32>;
 	fn set_center(&mut self, Point3<f32>);
-
-	fn front(&self) -> Vector3<f32>;
 
 	fn handle_mouse_motion(&mut self, xrel: i32, yrel: i32);
 
@@ -31,12 +31,10 @@ impl Camera for FPSCamera {
 
 	fn set_pos(&mut self, pos: Point3<f32>) {
 		self.pos = pos;
-		self.update_vectors();
 	}
 
-	fn move(&mut self, vec: Vector3<f32>) {
-		self.pos += vec;
-		self.update_vectors();
+	fn front(&self) -> Vector3<f32> {
+		self.front
 	}
 
 	fn center(&self) -> Point3<f32> {
@@ -45,11 +43,6 @@ impl Camera for FPSCamera {
 
 	fn set_center(&mut self, center: Point3<f32>) {
 		self.front = center - self.pos;
-		self.update_vectors();
-	}
-
-	fn front(&self) -> Vector3<f32> {
-		self.front
 	}
 
 	fn handle_mouse_motion(&mut self, xrel: i32, yrel: i32) {
